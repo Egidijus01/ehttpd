@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Diagnostics;
+using Listen;
 
 class Program
 {
@@ -58,8 +59,7 @@ class Program
             switch (optarg)
             {
                 case "-p":
-                    if (i + 1 < args.Length)
-                    {
+                    if (i + 1 < args.Length) {
                         string port = args[++i];
                         bound += AddListenerArg(port);
                     }
@@ -99,10 +99,24 @@ class Program
 
     static int AddListenerArg(string arg)
     {
-        // Placeholder function to simulate adding listener arguments
-        // In real implementation, this would bind a socket to a port
-        Console.WriteLine($"Adding listener for port {arg}");
-        return 1;
+        string host = null;
+        string port = arg;
+        int l;
+
+        int index = arg.LastIndexOf(":");
+
+        if (index != -1)
+        {
+            host = arg.Substring(0, index);
+            port = arg.Substring(index + 1);
+        }
+
+        if (host != null && host.StartsWith("[") && host.EndsWith("]"))
+        {
+            l = host.Length;
+            host = host.Substring(1, l - 2);
+        }
+        return Listener.BindSocket(host, port);
     }
 
     static string DecodeUrl(string url)
