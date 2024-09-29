@@ -2,6 +2,8 @@
 using System.IO;
 using System.Diagnostics;
 using Listen;
+using List;
+using MainStructures;
 
 class Program
 {
@@ -11,35 +13,42 @@ class Program
 
 	static void Main(string[] args)
 	{
+		init_defaults_pre();
 		ParseArgs(args);
 
 		if (docroot == null)
 		{
-			try
-			{
+			try {
 				docroot = Path.GetFullPath(".");
-			}
-			catch (Exception ex)
-			{
+			} catch (Exception ex) {
 				Console.Error.WriteLine($"Error: Unable to determine work dir: {ex.Message}");
 				Environment.Exit(1);
 			}
 		}
 
-		if (bound == 0)
-		{
+		if (bound == 0) {
 			Console.Error.WriteLine("Error: No sockets bound, unable to continue");
 			Environment.Exit(1);
 		}
 
-		if (!nofork)
-		{
+		if (!nofork) {
 			ForkProcess();
 		}
 
 		RunServer();
 	}
 
+	static void init_defaults_pre() {
+		MainStructure.conf.script_timeout = 60;
+		MainStructure.conf.network_timeout = 30;
+		MainStructure.conf.http_keepalive = 20;
+		MainStructure.conf.max_script_requests = 3;
+		MainStructure.conf.max_connections = 100;
+		MainStructure.conf.cgi_prefix = "/cgi-bin";
+		MainStructure.conf.cgi_path = "/sbin:/usr/sbin:/bin:/usr/bin";
+		MainStructure.conf.realm = "Protected Area";
+		LinkedList.INIT_LIST_HEAD(ref MainStructure.conf.cgi_alias);
+	}
 	static void usage(string name) {
 		Console.Write($@"
 		Usage: {name} -p [addr:]port -h docroot
