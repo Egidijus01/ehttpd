@@ -1,3 +1,4 @@
+using MainStructures;
 namespace Proc
 {
 	public class Process
@@ -45,9 +46,12 @@ namespace Proc
 			__VAR_MAX
 		}
 
-		public EnvVar GetProccessVars(Client Cl, PathInfo pi) {
-			HttpRequest req = Cl.request;
+		public MainStructure.envVar GetProccessVars(MainStructure.Client Cl, MainStructure.PathInfo pi) {
+			MainStructure.httpRequest req = Cl.request;
+			MainStructure.envVar vars = new MainStructure.envVar();
 			
+			
+			return vars;
 		}
 	}
 }

@@ -53,6 +53,14 @@ class Program
 	}
 	static void usage(string name) {
 		Console.Write($@"
+		 _____ _   _ _____ _____ ____  ____  
+		| ____| | | |_   _|_   _|  _ \|  _ \ 
+		|  _| | |_| | | |   | | | |_) | | | |
+		| |___|  _  | | |   | | |  __/| |_| |
+		|_____|_| |_| |_|   |_| |_|   |____/ 
+
+		");
+		Console.Write($@"
 		Usage: {name} -p [addr:]port -h docroot
 			-f				 Do not fork to background
 			-c file			 Configuration file, default is '/etc/eserv.conf'

@@ -1,10 +1,17 @@
 using System.Collections.Generic;
+using System.Net;
+using System.Text.Json.Nodes;
 using List;
 
 namespace MainStructures
 {
 	public class MainStructure
 	{
+		public struct Interpreter {
+			public LinkedList.ListHead list;
+			string path;
+			string ext;
+		}
 		public struct Config
 		{
 			public string? docroot;
@@ -29,7 +36,55 @@ namespace MainStructures
 			public int events_retry;
 			public LinkedList.ListHead cgi_alias;
 		}
+		public enum clientState {
+			CLIENT_STATE_INIT,
+			CLIENT_STATE_HEADER,
+			CLIENT_STATE_DATA,
+			CLIENT_STATE_DONE,
+			CLIENT_STATE_CLOSE,
+			CLIENT_STATE_CLEANUP
 
+		};
+
+		public enum httpMethod {
+			HTTP_GET,
+			HTTP_POST,
+			HTTP_HEAD,
+			HTTP_OPTIONS,
+			HTTP_PUT,
+			HTTP_PATCH,
+			HTTP_DELETE
+		}
+
+		public enum httpVersion {
+			HTTP_VER_0_9,
+			HTTP_VER_1_0,
+			HTTP_VER_1_1
+		}
+
+		public enum httpUserAgent {
+			UA_UNKNOWN,
+			UA_GECKO,
+			UA_CHROME,
+			UA_SAFARI,
+			UA_MSIE,
+			UA_KONQUEROR,
+			UA_OPERA,
+			UA_MSIE_OLD,
+			UA_MSIE_NEW
+		}
+
+		public struct httpRequest {
+			public httpMethod method;
+			public httpVersion version;
+			public httpUserAgent ua;
+			int redirectStatus;
+			int contentLength;
+			bool expectCont;
+			bool connectionClose;
+			bool disableChunked;
+			int transferChunked;
+		}
 		public struct PathInfo {
 			public string root;
 			public string phys;
@@ -40,7 +95,29 @@ namespace MainStructures
 			public Stat stat;
 			Interpreter ip;
 		}
+
+		public struct envVar {
+			string name;
+			string value;
+		}
 		
+		public class Dispatch {
+			public Func<Client, string, int, int> DataSend { get; set; }
+			public Action<Client> DataDone { get; set; }
+			public Action<Client> WriteCb { get; set; }
+			public Action<Client> CloseFds { get; set; }
+			public Action<Client> Free { get; set; }
+
+			public object ReqData { get; set; }
+			public Action<Client> ReqFree { get; set; }
+
+			public bool DataBlocked { get; set; }
+			public bool NoCache { get; set; }
+
+			public JsonArray FileHdr { get; set; }
+			public int FileFd { get; set; }
+			public DispatchProc Proc { get; set; }
+		}
 
 		public struct Client {
 			public LinkedList.ListHead list;
@@ -48,12 +125,19 @@ namespace MainStructures
 			public int id;
 
 			public int requests;
+			public httpRequest request;
 			public bool tls;
 			public int http_code;
-			public enum clientState state;
+			public clientState state;
 			public Dispatch dispatch;
+		}
 
-
+		public struct dispatchHandler {
+			public LinkedList.ListHead list;
+			public bool script;
+		public Func<string, bool>? checkUrl;
+		public Func<PathInfo, string, bool>? checkPath;
+		public Action<Client, string, PathInfo>? handleRequest;
 		}
 
 		public static Config conf;
