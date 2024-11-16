@@ -30,6 +30,32 @@ namespace MainStructures
 			public LinkedList.ListHead cgi_alias;
 		}
 
+		public struct PathInfo {
+			public string root;
+			public string phys;
+			public string name;
+			public string info;
+			public string query;
+			bool redirected;
+			public Stat stat;
+			Interpreter ip;
+		}
+		
+
+		public struct Client {
+			public LinkedList.ListHead list;
+			public int refcount;
+			public int id;
+
+			public int requests;
+			public bool tls;
+			public int http_code;
+			public enum clientState state;
+			public Dispatch dispatch;
+
+
+		}
+
 		public static Config conf;
 	}
 }

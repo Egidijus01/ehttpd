@@ -14,6 +14,8 @@ class Program
 	static void Main(string[] args)
 	{
 		init_defaults_pre();
+		uh_dispatch_add(cgi_dispatch);
+
 		ParseArgs(args);
 
 		if (docroot == null)
