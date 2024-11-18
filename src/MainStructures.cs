@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text.Json.Nodes;
 using List;
+using Proc;
 
 namespace MainStructures
 {
@@ -9,8 +10,15 @@ namespace MainStructures
 	{
 		public struct Interpreter {
 			public LinkedList.ListHead list;
-			string path;
-			string ext;
+			public string Path { get; set; }
+			public string Ext { get; set; }
+
+			public Interpreter(string ext, string path)
+			{
+				list = new LinkedList.ListHead();
+				Path = path;
+				Ext = ext;
+			}
 		}
 		public struct Config
 		{
@@ -74,6 +82,21 @@ namespace MainStructures
 			UA_MSIE_NEW
 		}
 
+		public struct Stat
+		{
+			public long Size { get; set; }
+			public DateTime LastModified { get; set; }
+			public bool IsDirectory { get; set; }
+
+			public Stat(string path)
+			{
+				var info = new FileInfo(path);
+				Size = info.Length;
+				LastModified = info.LastWriteTime;
+				IsDirectory = info.Attributes.HasFlag(FileAttributes.Directory);
+			}
+		}
+
 		public struct httpRequest {
 			public httpMethod method;
 			public httpVersion version;
@@ -100,7 +123,45 @@ namespace MainStructures
 			string name;
 			string value;
 		}
-		
+
+		public struct Relay
+		{
+			public FileStream Sfd;
+			public Process Proc;
+			public Timer Timeout;
+			public Client Cl;
+
+			public bool ProcessDone;
+			public bool Error;
+			public bool SkipData;
+
+			public int Ret;
+			public int HeaderOfs;
+
+			public Action<Relay, string, string> HeaderCb;
+			public Action<Relay> HeaderEnd;
+			public Action<Relay, int> Close;
+		}
+		public struct DispatchProc
+		{
+			public Timer? Timeout { get; set; }
+			public JsonObject Header { get; set; }
+			public FileStream? WriteFd { get; set; }
+			public Relay RelayData { get; set; }
+			public int StatusCode { get; set; }
+			public string StatusMessage { get; set; }
+
+			public DispatchProc()
+			{
+				Timeout = null;
+				Header = new JsonObject();
+				WriteFd = null;
+				RelayData = new Relay();
+				StatusCode = 0;
+				StatusMessage = string.Empty;
+			}
+		}
+
 		public class Dispatch {
 			public Func<Client, string, int, int> DataSend { get; set; }
 			public Action<Client> DataDone { get; set; }
@@ -129,6 +190,8 @@ namespace MainStructures
 			public bool tls;
 			public int http_code;
 			public clientState state;
+			public JsonArray hdr;
+			public JsonArray hdrResponse;
 			public Dispatch dispatch;
 		}
 
