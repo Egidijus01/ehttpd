@@ -210,5 +210,7 @@ namespace MainStructures
 		public Action<Client, string, PathInfo>? handleRequest;
 		}
 		public static Config conf = new Config();
+		public static dispatchHandler cgiDispatch = new dispatchHandler();
+
 	}
 }

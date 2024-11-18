@@ -32,15 +32,15 @@ namespace Cgi
 			if (!ChangeDir(pi.root))
 			{
 				if (ip != null) {
-					Execute(ip.path);
+					Execute(ip.Value.Path);
 				} else {
 					Execute(pi.phys);
 				}
 			}
 			Console.WriteLine($"Status: 500 Internal Server Error\r\n\r\n" +
 								$"Unable to launch the requested CGI program:\n" +
-								$"  {(ip != null ? ip.path : pi.phys)}: Error: Unable to change directory.");
-	}
+								$"  {(ip != null ? ip.Value.Path : pi.phys)}: Error: Unable to change directory.");
+		}
 
 		public static void CgiHandleRequest(MainStructure.Client cl, string url, MainStructure.PathInfo pi)
 		{

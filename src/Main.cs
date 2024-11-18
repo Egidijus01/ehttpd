@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Listen;
 using List;
 using MainStructures;
+using File;
 
 class Program
 {
@@ -13,8 +14,10 @@ class Program
 
 	static void Main(string[] args)
 	{
+		File.File file = new File.File();
+
 		init_defaults_pre();
-		uh_dispatch_add(cgi_dispatch);
+		file.dispatchAdd(ref MainStructure.cgiDispatch);
 
 		ParseArgs(args);
 
@@ -49,7 +52,7 @@ class Program
 		MainStructure.conf.cgi_prefix = "/cgi-bin";
 		MainStructure.conf.cgi_path = "/sbin:/usr/sbin:/bin:/usr/bin";
 		MainStructure.conf.realm = "Protected Area";
-		LinkedList.INIT_LIST_HEAD(ref MainStructure.conf.cgi_alias);
+		MainStructure.conf.cgi_alias = new LinkedList.ListHead();
 	}
 	static void usage(string name) {
 		Console.Write($@"
@@ -135,7 +138,7 @@ class Program
 			l = host.Length;
 			host = host.Substring(1, l - 2);
 		}
-		return Listener.BindSocket(host, port);
+		return Listener.BindSocket(host, port, false);
 	}
 
 	static string DecodeUrl(string url)
