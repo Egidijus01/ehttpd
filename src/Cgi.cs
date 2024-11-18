@@ -1,28 +1,29 @@
-using List;
 using MainStructures;
+using System;
+using System.Collections.Generic;
 
 namespace Cgi
 {
 	public class InterpreterManager
 	{
-		static LinkedList.ListHead interpreters = new LinkedList.ListHead();
+		static List<MainStructure.Interpreter> interpreters = new List<MainStructure.Interpreter>();
 
 		public static void InterpreterAdd(string ext, string path)
 		{
-			Interpreter inInterpreter = new Interpreter(ext, path);
-			LinkedList.list_add_tail(ref inInterpreter.list, ref interpreters);
+			MainStructure.Interpreter inInterpreter = new MainStructure.Interpreter(ext, path);
+			interpreters.Add(inInterpreter);
 		}
 
-		public static void CgiMain(Client cl, PathInfo pi, string url)
+		public static void CgiMain(MainStructure.Client cl, MainStructure.PathInfo pi, string url)
 		{
-			Interpreter? ip = pi.ip; // Assuming ip is set in PathInfo.
+			MainStructure.Interpreter? ip = pi.ip;
 			ClearEnv();
 
 			SetEnv("PATH", MainStructure.conf.cgi_path);
 
-			foreach (EnvVar ev in GetProcessVars(cl, pi))
+			foreach (MainStructure.envVar ev in GetProcessVars(cl, pi))
 			{
-				if (string.IsNullOrEmpty(ev.Value))
+				if (string.IsNullOrEmpty(ev.value))
 					continue;
 
 				SetEnv(ev.Name, ev.Value);
@@ -47,7 +48,7 @@ namespace Cgi
 			}
 		}
 
-		public static void CgiHandleRequest(Client cl, string url, PathInfo pi)
+		public static void CgiHandleRequest(MainStructure.Client cl, string url, MainStructure.PathInfo pi)
 		{
 			const uint Mode = S_IFREG | S_IXOTH;
 
@@ -65,12 +66,12 @@ namespace Cgi
 			}
 		}
 
-		public static bool CheckCgiPath(PathInfo pi, string url)
+		public static bool CheckCgiPath(MainStructure.PathInfo pi, string url)
 		{
-			foreach (Interpreter ip in LinkedList.Enumerate<Interpreter>(interpreters))
+			foreach (MainStructure.Interpreter ip in interpreters)
 			{
 				int len = ip.Ext.Length;
-				string path = pi.Phys;
+				string path = pi.phys;
 
 				if (len >= path.Length)
 					continue;
@@ -98,5 +99,63 @@ namespace Cgi
 			checkPath = CheckCgiPath,
 			handleRequest = CgiHandleRequest
 		};
+
+		private static void SetEnv(string name, string value)
+		{
+			Environment.SetEnvironmentVariable(name, value);
+		}
+
+		private static void ClearEnv()
+		{
+		}
+
+		private static IEnumerable<MainStructure.envVar> GetProcessVars(MainStructure.Client cl, MainStructure.PathInfo pi)
+		{
+			return new List<MainStructure.envVar>();
+		}
+
+		private static bool ChangeDir(string path)
+		{
+			try
+			{
+				System.IO.Directory.SetCurrentDirectory(path);
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		private static void Execute(string path, string phys)
+		{
+			System.Diagnostics.Process.Start(path, phys);
+		}
+
+		private static void Execute(string phys)
+		{
+			System.Diagnostics.Process.Start(phys);
+		}
+
+		private static string HtmlEscape(string url)
+		{
+			return Uri.EscapeDataString(url);
+		}
+
+		private static void ClientError(MainStructure.Client cl, int statusCode, string statusText, string message)
+		{
+			Console.WriteLine($"Error {statusCode}: {statusText} - {message}");
+		}
+
+		private static bool PathMatch(string prefix, string path)
+		{
+			return path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+		}
+
+		private static bool CreateProcess(MainStructure.Client cl, MainStructure.PathInfo pi, string url, Action<MainStructure.Client, MainStructure.PathInfo, string> mainFunction)
+		{
+			mainFunction(cl, pi, url);
+			return true;
+		}
 	}
 }
