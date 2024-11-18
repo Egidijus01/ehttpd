@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.IO.Pipes;
 using System.Threading;
@@ -6,46 +7,8 @@ using System.Text.Json.Nodes;
 
 namespace Proc
 {
-	public class Process
+	public class ProcessManager
 	{
-		private static readonly int HDR_accept = 1;
-		private static readonly int HDR_accept_charset = 2;
-		private static readonly int HDR_accept_encoding = 3;
-		private static readonly int HDR_accept_language = 4;
-		private static readonly int HDR_authorization = 5;
-		private static readonly int HDR_connection = 6;
-		private static readonly int HDR_cookie = 7;
-		private static readonly int HDR_host = 8;
-		private static readonly int HDR_origin = 9;
-		private static readonly int HDR_referer = 10;
-		private static readonly int HDR_user_agent = 11;
-		private static readonly int HDR_x_http_method_override = 12;
-		private static readonly int HDR_http_auth_user = 13;
-		private static readonly int HDR_http_auth_pass = 14;
-		private static readonly int HDR_content_type = 15;
-		private static readonly int HDR_content_length = 16;
-
-		// Array of Tuples representing the structure
-		private static readonly (string name, int idx)[] procHeaderEnv = new (string, int)[]
-		{
-			{ "HTTP_ACCEPT", HDR_accept },
-			{ "HTTP_ACCEPT_CHARSET", HDR_accept_charset },
-			{ "HTTP_ACCEPT_ENCODING", HDR_accept_encoding },
-			{ "HTTP_ACCEPT_LANGUAGE", HDR_accept_language },
-			{ "HTTP_AUTHORIZATION", HDR_authorization },
-			{ "HTTP_CONNECTION", HDR_connection },
-			{ "HTTP_COOKIE", HDR_cookie },
-			{ "HTTP_HOST", HDR_host },
-			{ "HTTP_ORIGIN", HDR_origin },
-			{ "HTTP_REFERER", HDR_referer },
-			{ "HTTP_USER_AGENT", HDR_user_agent },
-			{ "HTTP_X_HTTP_METHOD_OVERRIDE", HDR_x_http_method_override },
-			{ "HTTP_AUTH_USER", HDR_http_auth_user },
-			{ "HTTP_AUTH_PASS", HDR_http_auth_pass },
-			{ "CONTENT_TYPE", HDR_content_type },
-			{ "CONTENT_LENGTH", HDR_content_length }
-		};
-
 		public enum ExtraVars
 		{
 			_VAR_GW,
@@ -64,16 +27,83 @@ namespace Proc
 			VAR_SERVER_NAME,
 			VAR_SERVER_ADDR,
 			VAR_SERVER_PORT,
+			VAR_REMOTE_NAME,
 			VAR_REMOTE_ADDR,
-
+			VAR_REMOTE_PORT,
 			__VAR_MAX
 		}
 
-		public MainStructure.envVar GetProccessVars(MainStructure.Client Cl, MainStructure.PathInfo pi) 
+		public class ProcHeaderEnv
 		{
-			MainStructure.httpRequest req = Cl.request;
+			public string Name { get; set; }
+			public ExtraVars Index { get; set; }
+
+			public ProcHeaderEnv(string name, ExtraVars index)
+			{
+				Name = name;
+				Index = index;
+			}
+		}
+
+		public static ProcHeaderEnv[] ProcHeaderEnvArray = new ProcHeaderEnv[]
+		{
+			new ProcHeaderEnv("HTTP_ACCEPT", ExtraVars._VAR_GW),
+			new ProcHeaderEnv("HTTP_ACCEPT_CHARSET", ExtraVars._VAR_SOFTWARE),
+			new ProcHeaderEnv("HTTP_ACCEPT_ENCODING", ExtraVars.VAR_SCRIPT_NAME),
+			new ProcHeaderEnv("HTTP_ACCEPT_LANGUAGE", ExtraVars.VAR_SCRIPT_FILE),
+			new ProcHeaderEnv("HTTP_AUTHORIZATION", ExtraVars.VAR_DOCROOT),
+			new ProcHeaderEnv("HTTP_CONNECTION", ExtraVars.VAR_QUERY),
+			new ProcHeaderEnv("HTTP_COOKIE", ExtraVars.VAR_REQUEST),
+			new ProcHeaderEnv("HTTP_HOST", ExtraVars.VAR_PROTO),
+			new ProcHeaderEnv("HTTP_ORIGIN", ExtraVars.VAR_METHOD),
+			new ProcHeaderEnv("HTTP_REFERER", ExtraVars.VAR_PATH_INFO),
+			new ProcHeaderEnv("HTTP_USER_AGENT", ExtraVars.VAR_USER),
+			new ProcHeaderEnv("HTTP_X_HTTP_METHOD_OVERRIDE", ExtraVars.VAR_HTTPS),
+			new ProcHeaderEnv("HTTP_AUTH_USER", ExtraVars.VAR_REDIRECT),
+			new ProcHeaderEnv("HTTP_AUTH_PASS", ExtraVars.VAR_SERVER_NAME),
+			new ProcHeaderEnv("CONTENT_TYPE", ExtraVars.VAR_SERVER_ADDR),
+			new ProcHeaderEnv("CONTENT_LENGTH", ExtraVars.VAR_SERVER_PORT)
+		};
+
+		public class EnvVar
+		{
+			public string Name { get; set; }
+			public string Value { get; set; }
+
+			public EnvVar(string name, string value = null)
+			{
+				Name = name;
+				Value = value;
+			}
+		}
+
+		public EnvVar[] ExtraVarsArray = new EnvVar[]
+		{
+			new EnvVar("GATEWAY_INTERFACE", "CGI/1.1"),
+			new EnvVar("SERVER_SOFTWARE", "uhttpd"),
+			new EnvVar("SCRIPT_NAME"),
+			new EnvVar("SCRIPT_FILENAME"),
+			new EnvVar("DOCUMENT_ROOT"),
+			new EnvVar("QUERY_STRING"),
+			new EnvVar("REQUEST_URI"),
+			new EnvVar("SERVER_PROTOCOL"),
+			new EnvVar("REQUEST_METHOD"),
+			new EnvVar("PATH_INFO"),
+			new EnvVar("REMOTE_USER"),
+			new EnvVar("HTTPS"),
+			new EnvVar("REDIRECT_STATUS", "some_redirect_status"),
+			new EnvVar("SERVER_NAME", "localhost"),
+			new EnvVar("SERVER_ADDR", "127.0.0.1"),
+			new EnvVar("SERVER_PORT", "80"),
+			new EnvVar("REMOTE_HOST", "192.168.1.1"),
+			new EnvVar("REMOTE_ADDR", "192.168.1.1"),
+			new EnvVar("REMOTE_PORT", "8080")
+		};
+		public MainStructure.envVar GetProcessVars(MainStructure.Client cl, MainStructure.PathInfo pi)
+		{
+			MainStructure.httpRequest req = cl.request;
 			MainStructure.envVar vars = new MainStructure.envVar();
-			JsonArray data = Cl.hdr.head;
+			JsonArray data = cl.hdr;
 			string url;
 			int len;
 			int i;
@@ -81,8 +111,8 @@ namespace Proc
 			return vars;
 		}
 
-		public bool create_process(MainStructure.Client cl, MainStructure.PathInfo pi, string url,
-								Action<MainStructure.Client, MainStructure.PathInfo, string> callback)
+		public bool CreateProcess(MainStructure.Client cl, MainStructure.PathInfo pi, string url,
+								  Action<MainStructure.Client, MainStructure.PathInfo, string> callback)
 		{
 			var dispatch = cl.dispatch;
 			var proc = dispatch.Proc;
@@ -94,14 +124,14 @@ namespace Proc
 			{
 				try
 				{
-					var process = new Process
+					var process = new System.Diagnostics.Process
 					{
 						StartInfo = new ProcessStartInfo
 						{
 							FileName = "child_process",
 							RedirectStandardInput = true,
 							RedirectStandardOutput = true,
-							UseShellExecute = false,  // UseShellExecute must be false to redirect
+							UseShellExecute = false,
 							CreateNoWindow = true
 						}
 					};
@@ -109,7 +139,6 @@ namespace Proc
 				}
 				catch (Exception ex)
 				{
-					// Handle any exceptions that occur during process creation
 					Console.WriteLine($"Error creating process: {ex.Message}");
 					return false;
 				}

@@ -3,6 +3,9 @@ using System.Net;
 using System.Text.Json.Nodes;
 using List;
 using Proc;
+using System;
+using System.IO;
+using System.Diagnostics;
 
 namespace MainStructures
 {
@@ -87,13 +90,16 @@ namespace MainStructures
 			public long Size { get; set; }
 			public DateTime LastModified { get; set; }
 			public bool IsDirectory { get; set; }
+			public FileAttributes Attributes { get; set; }
+
 
 			public Stat(string path)
 			{
-				var info = new FileInfo(path);
-				Size = info.Length;
-				LastModified = info.LastWriteTime;
-				IsDirectory = info.Attributes.HasFlag(FileAttributes.Directory);
+	            FileInfo fileInfo = new FileInfo(path);
+				Size = fileInfo.Length;
+				LastModified = fileInfo.LastWriteTime;
+				IsDirectory = fileInfo.Attributes.HasFlag(FileAttributes.Directory);
+				Attributes = fileInfo.Attributes;
 			}
 		}
 
@@ -114,14 +120,14 @@ namespace MainStructures
 			public string name;
 			public string info;
 			public string query;
-			bool redirected;
+			public bool redirected;
 			public Stat stat;
-			Interpreter ip;
+			public Interpreter ip;
 		}
 
 		public struct envVar {
-			string name;
-			string value;
+			public string name;
+			public string value;
 		}
 
 		public struct Relay
@@ -142,6 +148,7 @@ namespace MainStructures
 			public Action<Relay> HeaderEnd;
 			public Action<Relay, int> Close;
 		}
+
 		public struct DispatchProc
 		{
 			public Timer? Timeout { get; set; }
@@ -202,7 +209,6 @@ namespace MainStructures
 		public Func<PathInfo, string, bool>? checkPath;
 		public Action<Client, string, PathInfo>? handleRequest;
 		}
-
-		public static Config conf;
+		public static Config conf = new Config();
 	}
 }

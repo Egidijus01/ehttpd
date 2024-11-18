@@ -26,34 +26,27 @@ namespace Cgi
 				if (string.IsNullOrEmpty(ev.value))
 					continue;
 
-				SetEnv(ev.Name, ev.Value);
+				SetEnv(ev.name, ev.value);
 			}
 
-			if (!ChangeDir(pi.Root))
+			if (!ChangeDir(pi.root))
 			{
-				if (ip != null)
-				{
-					Execute(ip.Path, pi.Phys);
-				}
-				else
-				{
-					Execute(pi.Phys);
+				if (ip != null) {
+					Execute(ip.path);
+				} else {
+					Execute(pi.phys);
 				}
 			}
-			else
-			{
-				Console.WriteLine($"Status: 500 Internal Server Error\r\n\r\n" +
-								  $"Unable to launch the requested CGI program:\n" +
-								  $"  {(ip != null ? ip.Path : pi.Phys)}: Error: Unable to change directory.");
-			}
-		}
+			Console.WriteLine($"Status: 500 Internal Server Error\r\n\r\n" +
+								$"Unable to launch the requested CGI program:\n" +
+								$"  {(ip != null ? ip.path : pi.phys)}: Error: Unable to change directory.");
+	}
 
 		public static void CgiHandleRequest(MainStructure.Client cl, string url, MainStructure.PathInfo pi)
 		{
-			const uint Mode = S_IFREG | S_IXOTH;
+		    const FileAttributes Mode = FileAttributes.Normal | FileAttributes.System; // Change this to appropriate attributes
 
-			if (pi.ip == null && (pi.stat.st_mode & Mode) != Mode)
-			{
+		    if (pi.ip.Equals(default(MainStructure.Interpreter)) && !pi.stat.Attributes.HasFlag(Mode)) {
 				string? escapedUrl = HtmlEscape(url);
 				ClientError(cl, 403, "Forbidden",
 							$"You don't have permission to access {escapedUrl ?? "the URL"} on this server.");
@@ -83,11 +76,11 @@ namespace Cgi
 				return true;
 			}
 
-			pi.ip = null;
+			pi.ip = default(MainStructure.Interpreter);
 
 			if (!string.IsNullOrEmpty(MainStructure.conf.cgi_docroot_prefix))
 			{
-				return PathMatch(MainStructure.conf.cgi_docroot_prefix, pi.Phys);
+				return PathMatch(MainStructure.conf.cgi_docroot_prefix, pi.phys);
 			}
 
 			return false;
