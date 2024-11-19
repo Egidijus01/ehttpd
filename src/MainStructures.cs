@@ -95,7 +95,7 @@ namespace MainStructures
 
 			public Stat(string path)
 			{
-	            FileInfo fileInfo = new FileInfo(path);
+				FileInfo fileInfo = new FileInfo(path);
 				Size = fileInfo.Length;
 				LastModified = fileInfo.LastWriteTime;
 				IsDirectory = fileInfo.Attributes.HasFlag(FileAttributes.Directory);
@@ -205,9 +205,13 @@ namespace MainStructures
 		public struct dispatchHandler {
 			public LinkedList.ListHead list;
 			public bool script;
-		public Func<string, bool>? checkUrl;
-		public Func<PathInfo, string, bool>? checkPath;
-		public Action<Client, string, PathInfo>? handleRequest;
+			public Func<string, bool>? checkUrl;
+			public Func<PathInfo, string, bool>? checkPath;
+			public Action<Client, string, PathInfo>? handleRequest;
+			public dispatchHandler() {
+				list = new LinkedList.ListHead();
+				LinkedList.INIT_LIST_HEAD(ref list);
+			}
 		}
 		public static Config conf = new Config();
 		public static dispatchHandler cgiDispatch = new dispatchHandler();

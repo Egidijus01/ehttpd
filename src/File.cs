@@ -5,10 +5,20 @@ namespace File
 {
 	public class File
 	{
-		LinkedList.ListHead indexFiles = new LinkedList.ListHead();
-		LinkedList.ListHead dispatchHandlers = new LinkedList.ListHead();
-		LinkedList.ListHead pendingRequests = new LinkedList.ListHead();
+		private LinkedList.ListHead indexFiles;
+		private LinkedList.ListHead dispatchHandlers;
+		private LinkedList.ListHead pendingRequests;
 
+		public File() {
+			indexFiles = new LinkedList.ListHead();
+			LinkedList.INIT_LIST_HEAD(ref indexFiles);
+
+			dispatchHandlers = new LinkedList.ListHead();
+			LinkedList.INIT_LIST_HEAD(ref dispatchHandlers);
+
+			pendingRequests = new LinkedList.ListHead();
+			LinkedList.INIT_LIST_HEAD(ref pendingRequests);
+		}
 		public struct deferredRequest
 		{
 			public LinkedList.ListHead list;
