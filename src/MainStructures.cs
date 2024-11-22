@@ -38,7 +38,7 @@ namespace MainStructures
 			public int network_timeout;
 			public bool rfc1918_filter;
 			public bool tls_redirect;
-			public bool tcp_keepalive;
+			public int tcp_keepalive;
 			public int max_script_requests;
 			public int max_connections;
 			public int http_keepalive;
@@ -107,12 +107,12 @@ namespace MainStructures
 			public httpMethod method;
 			public httpVersion version;
 			public httpUserAgent ua;
-			int redirectStatus;
-			int contentLength;
-			bool expectCont;
-			bool connectionClose;
-			bool disableChunked;
-			int transferChunked;
+			public int redirectStatus;
+			public int contentLength;
+			public bool expectCont;
+			public bool connectionClose;
+			public bool disableChunked;
+			public int transferChunked;
 		}
 		public struct PathInfo {
 			public string root;

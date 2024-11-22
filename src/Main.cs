@@ -1,20 +1,23 @@
 ﻿using System;
+using System.Threading;
 using System.IO;
 using System.Diagnostics;
+using System.Reflection;
 using Listen;
 using List;
 using MainStructures;
-using File;
+using FileHandling;
 
 class Program
 {
+	private static Listener listener = new Listener();
 	static bool nofork = false;
 	static string docroot = null;
 	static int bound = 0;
 
 	static void Main(string[] args)
 	{
-		File.File file = new File.File();
+		FileHandler file = new FileHandler();
 
 		init_defaults_pre();
 		file.dispatchAdd(ref MainStructure.cgiDispatch);
@@ -149,36 +152,43 @@ class Program
 
 	static void ForkProcess()
 	{
+		string currentExecutable = Assembly.GetEntryAssembly().Location;
+
+		var startInfo = new ProcessStartInfo
+		{
+			FileName = currentExecutable,
+			RedirectStandardOutput = true,
+			RedirectStandardError = true,
+			UseShellExecute = false,
+			CreateNoWindow = true
+		};
+
 		try
 		{
-			ProcessStartInfo startInfo = new ProcessStartInfo()
+			var process = Process.Start(startInfo);
+
+			using (var nullStream = File.Open("/dev/null", FileMode.Open))
 			{
-				FileName = "/bin/sh",
-				Arguments = "-c \"sleep 60\"",
-				UseShellExecute = false,
-				RedirectStandardInput = true,
-				RedirectStandardOutput = true,
-				RedirectStandardError = true
-			};
-			Process process = Process.Start(startInfo);
+				process.StandardOutput.BaseStream.CopyTo(nullStream);
+				process.StandardError.BaseStream.CopyTo(nullStream);
+			}
 
-			// Redirect output (equivalent to `dup2` to /dev/null)
-			process.StandardOutput.Dispose();
-			process.StandardError.Dispose();
-			process.StandardInput.Dispose();
-
-			Console.WriteLine("Forked process");
+			process.WaitForExit();
 		}
 		catch (Exception ex)
 		{
-			Console.Error.WriteLine($"Error: {ex.Message}");
+			Console.WriteLine($"Error: {ex.Message}");
 			Environment.Exit(1);
 		}
+
+		Environment.Exit(0);
 	}
 
-	static void RunServer()
+	static async Task RunServer()
 	{
-		// Placeholder for running the server logic
-		Console.WriteLine("Running server...");
+		Listener.SetupListeners();
+	    Console.WriteLine("Server is running and ready to accept connections...");
+
+		await Task.Delay(-1);
 	}
 }

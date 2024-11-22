@@ -1,15 +1,15 @@
 using List;
 using MainStructures;
 
-namespace File
+namespace FileHandling
 {
-	public class File
+	public class FileHandler
 	{
 		private LinkedList.ListHead indexFiles;
 		private LinkedList.ListHead dispatchHandlers;
 		private LinkedList.ListHead pendingRequests;
 
-		public File() {
+		public FileHandler() {
 			indexFiles = new LinkedList.ListHead();
 			LinkedList.INIT_LIST_HEAD(ref indexFiles);
 
