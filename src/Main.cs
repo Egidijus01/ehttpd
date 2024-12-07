@@ -14,27 +14,24 @@ class Program
 {
 	private static Listener listener = new Listener();
 	static bool nofork = false;
-	static string docroot = null;
 	static int bound = 0;
 
 	static void Main(string[] args)
 	{
 		FileHandler file = new FileHandler();
-		System.Console.WriteLine("runni");
 		init_defaults_pre();
 		file.dispatchAdd(ref MainStructure.cgiDispatch);
 
 		ParseArgs(args);
-		if (docroot == null)
+		if (MainStructure.conf.docroot == null)
 		{
 			try {
-				docroot = Path.GetFullPath(".");
+				MainStructure.conf.docroot = Path.GetFullPath("./www");
 			} catch (Exception ex) {
 				Console.Error.WriteLine($"Error: Unable to determine work dir: {ex.Message}");
 				Environment.Exit(1);
 			}
 		}
-		System.Console.WriteLine("asd");
 
 		if (bound == 0) {
 			Console.Error.WriteLine("Error: No sockets bound, unable to continue");
@@ -42,10 +39,8 @@ class Program
 		}
 
 		if (!nofork) {
-			System.Console.WriteLine("aaaaaaaa");
 			ForkProcess();
 		}
-		System.Console.WriteLine("RUNNING SERVER");
 		RunServer();
 	}
 
@@ -102,7 +97,7 @@ class Program
 							Console.Error.WriteLine($"Error: Invalid directory {path}");
 							Environment.Exit(1);
 						}
-						docroot = Path.GetFullPath(path);
+						MainStructure.conf.docroot = Path.GetFullPath(path);
 					}
 					break;
 
