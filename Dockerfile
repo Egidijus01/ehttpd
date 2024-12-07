@@ -1,26 +1,13 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
-
+FROM mcr.microsoft.com/dotnet/sdk:8.0@sha256:35792ea4ad1db051981f62b313f1be3b46b1f45cadbaa3c288cd0d3056eefb83 AS build-env
 WORKDIR /App
 
 COPY . ./
 RUN dotnet restore
-RUN dotnet publish -c Release -r linux-x64 --self-contained -o out
-COPY bin/Release/net8.0/linux-x64/csh_server.dll ./
-COPY bin/Release/net8.0/linux-x64/csh_server ./
+# Build and publish a release
+RUN dotnet publish -c Release -o out
 
-RUN apk add --no-cache \
-    libstdc++ \
-    libgcc \
-    libcurl
-
-RUN chmod +x csh_server
-
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
-
+# Build runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0@sha256:6c4df091e4e531bb93bdbfe7e7f0998e7ced344f54426b7e874116a3dc3233ff
 WORKDIR /App
-
 COPY --from=build-env /App/out .
-
-EXPOSE 80
-
-CMD ["dotnet", "csh_server.dll"]  # Change this if necessary
+ENTRYPOINT ["dotnet", "DotNet.Docker.dll"]

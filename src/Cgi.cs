@@ -78,9 +78,9 @@ namespace Cgi
 
 			pi.ip = default(MainStructure.Interpreter);
 
-			if (!string.IsNullOrEmpty(MainStructure.conf.cgi_docroot_prefix))
+			if (!string.IsNullOrEmpty(MainStructure.conf.cgi_docroot_path))
 			{
-				return PathMatch(MainStructure.conf.cgi_docroot_prefix, pi.phys);
+				return PathMatch(MainStructure.conf.cgi_docroot_path, pi.phys);
 			}
 
 			return false;
