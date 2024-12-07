@@ -30,7 +30,7 @@ namespace MainStructures
 			public string? file;
 			public string? error_handler;
 			public string? cgi_prefix;
-			public string? cgi_docroot_prefix;
+			public string? cgi_docroot_path;
 			public string? cgi_path;
 			public string? dirlist_charset;
 			public bool no_symlinks;
@@ -45,6 +45,7 @@ namespace MainStructures
 			public int script_timeout;
 			public int cgi_prefix_len;
 			public int events_retry;
+			public int pageViews;
 			public LinkedList.ListHead cgi_alias;
 		}
 		public enum clientState {

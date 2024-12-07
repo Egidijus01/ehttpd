@@ -7,6 +7,8 @@ using Listen;
 using List;
 using MainStructures;
 using FileHandling;
+using System.Net;
+using System.Text;
 
 class Program
 {
@@ -18,12 +20,11 @@ class Program
 	static void Main(string[] args)
 	{
 		FileHandler file = new FileHandler();
-
+		System.Console.WriteLine("runni");
 		init_defaults_pre();
 		file.dispatchAdd(ref MainStructure.cgiDispatch);
 
 		ParseArgs(args);
-
 		if (docroot == null)
 		{
 			try {
@@ -33,6 +34,7 @@ class Program
 				Environment.Exit(1);
 			}
 		}
+		System.Console.WriteLine("asd");
 
 		if (bound == 0) {
 			Console.Error.WriteLine("Error: No sockets bound, unable to continue");
@@ -40,9 +42,10 @@ class Program
 		}
 
 		if (!nofork) {
+			System.Console.WriteLine("aaaaaaaa");
 			ForkProcess();
 		}
-
+		System.Console.WriteLine("RUNNING SERVER");
 		RunServer();
 	}
 
@@ -181,14 +184,10 @@ class Program
 			Environment.Exit(1);
 		}
 
-		Environment.Exit(0);
 	}
 
 	static async Task RunServer()
 	{
 		Listener.SetupListeners();
-	    Console.WriteLine("Server is running and ready to accept connections...");
-
-		await Task.Delay(-1);
 	}
 }
