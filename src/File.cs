@@ -32,7 +32,7 @@ namespace FileHandling
 		public struct indexFile
 		{
 			public LinkedList.ListHead list;
-			public char name;
+			public string name;
 		}
 
 		private enum filHdr
@@ -49,6 +49,16 @@ namespace FileHandling
 		public void dispatchAdd(ref MainStructure.dispatchHandler d)
 		{
 			LinkedList.list_add_tail(ref d.list, ref dispatchHandlers);
+		}
+
+		public void indexAdd(string filename) {
+            indexFile idx = new indexFile
+            {
+                name = filename,
+                list = new LinkedList.ListHead()
+            };			
+			LinkedList.INIT_LIST_HEAD(ref idx.list);
+			LinkedList.list_add_tail(ref idx.list, ref indexFiles);
 		}
 	}
 }
