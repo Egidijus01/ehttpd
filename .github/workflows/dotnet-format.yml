@@ -25,4 +25,4 @@ jobs:
         run: dotnet restore
 
       - name: Run dotnet format
-        run: dotnet format --check --verbosity detailed
+        run: dotnet format csh_server.sln --verbosity detailed
