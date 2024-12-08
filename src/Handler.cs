@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using List;
 using MainStructures;
@@ -32,39 +33,44 @@ namespace Handler
                         Console.WriteLine();
 
                         string requestPath = req.Url.AbsolutePath;
-                        if (requestPath != "/favicon.ico")
+
+                        if (!Regex.IsMatch(requestPath, @"\.[a-zA-Z0-9]+$"))
                         {
-                            MainStructure.conf.pageViews += 1;
-                        }
-
-                        if (requestPath == "/")
-                        {
-                            requestPath = "/index.html";
-                        }
-                        string sanitizedPath = requestPath.TrimStart('/');
-
-                        string fullPath = Path.Combine(MainStructure.conf.docroot, sanitizedPath);
-                        Console.WriteLine($"Full Path: {fullPath}");
-
-                        if (File.Exists(fullPath))
-                        {
-                            byte[] fileData = await File.ReadAllBytesAsync(fullPath);
-                            resp.ContentType = "text/html";
-                            resp.ContentEncoding = Encoding.UTF8;
-                            resp.ContentLength64 = fileData.LongLength;
-
-                            await resp.OutputStream.WriteAsync(fileData, 0, fileData.Length);
+                            await API.APIDispatcher.Dispatch(ctx);
                         }
                         else
                         {
-                            string errorMessage = "<html><body><h1>404 Not Found</h1></body></html>";
-                            byte[] data = Encoding.UTF8.GetBytes(errorMessage);
-                            resp.StatusCode = (int)HttpStatusCode.NotFound;
-                            resp.ContentType = "text/html";
-                            resp.ContentEncoding = Encoding.UTF8;
-                            resp.ContentLength64 = data.LongLength;
+                            if (requestPath == "/")
+                            {
+                                requestPath = "/index.html";
+                            }
+                            string sanitizedPath = requestPath.TrimStart('/');
+                            string fullPath = Path.Combine(MainStructure.conf.docroot, sanitizedPath);
 
-                            await resp.OutputStream.WriteAsync(data, 0, data.Length);
+                            if (File.Exists(fullPath))
+                            {
+                                string fileExtension = Path.GetExtension(fullPath).ToLower();
+                                string contentType = GetContentType(fileExtension);
+
+                                byte[] fileData = await File.ReadAllBytesAsync(fullPath);
+                                resp.ContentType = contentType;
+                                resp.ContentEncoding = Encoding.UTF8;
+                                resp.ContentLength64 = fileData.LongLength;
+
+                                await resp.OutputStream.WriteAsync(fileData, 0, fileData.Length);
+                            }
+                            else
+                            {
+                                string errorMessage = "{\"error\": \"File not found\"}";
+                                byte[] errorData = Encoding.UTF8.GetBytes(errorMessage);
+
+                                resp.StatusCode = (int)HttpStatusCode.NotFound;
+                                resp.ContentType = "application/json";
+                                resp.ContentEncoding = Encoding.UTF8;
+                                resp.ContentLength64 = errorData.Length;
+
+                                await resp.OutputStream.WriteAsync(errorData, 0, errorData.Length);
+                            }
                         }
                         resp.Close();
                     }
@@ -80,6 +86,27 @@ namespace Handler
             catch (Exception ex)
             {
                 Console.WriteLine($"Error starting listener: {ex.Message}");
+            }
+        }
+
+        private static string GetContentType(string extension)
+        {
+            switch (extension)
+            {
+                case ".html": return "text/html";
+                case ".css": return "text/css";
+                case ".js": return "application/javascript";
+                case ".json": return "application/json";
+                case ".jpg":
+                case ".jpeg": return "image/jpeg";
+                case ".png": return "image/png";
+                case ".gif": return "image/gif";
+                case ".svg": return "image/svg+xml";
+                case ".woff": 
+                case ".woff2": return "font/woff2";
+                case ".ttf": return "font/ttf";
+                case ".otf": return "font/otf";
+                default: return "application/octet-stream";
             }
         }
     }
