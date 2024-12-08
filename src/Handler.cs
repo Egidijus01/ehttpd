@@ -32,39 +32,40 @@ namespace Handler
                         Console.WriteLine();
 
                         string requestPath = req.Url.AbsolutePath;
-                        if (requestPath != "/favicon.ico")
+
+                        if (requestPath.StartsWith("/api"))
                         {
-                            MainStructure.conf.pageViews += 1;
-                        }
-
-                        if (requestPath == "/")
-                        {
-                            requestPath = "/index.html";
-                        }
-                        string sanitizedPath = requestPath.TrimStart('/');
-
-                        string fullPath = Path.Combine(MainStructure.conf.docroot, sanitizedPath);
-                        Console.WriteLine($"Full Path: {fullPath}");
-
-                        if (File.Exists(fullPath))
-                        {
-                            byte[] fileData = await File.ReadAllBytesAsync(fullPath);
-                            resp.ContentType = "text/html";
-                            resp.ContentEncoding = Encoding.UTF8;
-                            resp.ContentLength64 = fileData.LongLength;
-
-                            await resp.OutputStream.WriteAsync(fileData, 0, fileData.Length);
+                            await API.APIDispatcher.Dispatch(ctx);
                         }
                         else
                         {
-                            string errorMessage = "<html><body><h1>404 Not Found</h1></body></html>";
-                            byte[] data = Encoding.UTF8.GetBytes(errorMessage);
-                            resp.StatusCode = (int)HttpStatusCode.NotFound;
-                            resp.ContentType = "text/html";
-                            resp.ContentEncoding = Encoding.UTF8;
-                            resp.ContentLength64 = data.LongLength;
+                            if (requestPath == "/")
+                            {
+                                requestPath = "/index.html";
+                            }
+                            string sanitizedPath = requestPath.TrimStart('/');
+                            string fullPath = Path.Combine(MainStructure.conf.docroot, sanitizedPath);
 
-                            await resp.OutputStream.WriteAsync(data, 0, data.Length);
+                            if (File.Exists(fullPath))
+                            {
+                                byte[] fileData = await File.ReadAllBytesAsync(fullPath);
+                                resp.ContentType = "text/html";
+                                resp.ContentEncoding = Encoding.UTF8;
+                                resp.ContentLength64 = fileData.LongLength;
+
+                                await resp.OutputStream.WriteAsync(fileData, 0, fileData.Length);
+                            }
+                            else
+                            {
+                                string errorMessage = "<html><body><h1>404 Not Found</h1></body></html>";
+                                byte[] data = Encoding.UTF8.GetBytes(errorMessage);
+                                resp.StatusCode = (int)HttpStatusCode.NotFound;
+                                resp.ContentType = "text/html";
+                                resp.ContentEncoding = Encoding.UTF8;
+                                resp.ContentLength64 = data.LongLength;
+
+                                await resp.OutputStream.WriteAsync(data, 0, data.Length);
+                            }
                         }
                         resp.Close();
                     }
