@@ -102,7 +102,7 @@ namespace Handler
                 case ".png": return "image/png";
                 case ".gif": return "image/gif";
                 case ".svg": return "image/svg+xml";
-                case ".woff": 
+                case ".woff":
                 case ".woff2": return "font/woff2";
                 case ".ttf": return "font/ttf";
                 case ".otf": return "font/otf";
