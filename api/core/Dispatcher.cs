@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Router;
 
 namespace API
 {
@@ -29,6 +30,7 @@ namespace API
             var request = context.Request;
             var response = context.Response;
 
+            Route.RouteRequest(request, response);
         }
     }
 }
