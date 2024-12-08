@@ -33,17 +33,18 @@ namespace Handler
                         Console.WriteLine();
 
                         string requestPath = req.Url.AbsolutePath;
+                        if (requestPath == "/")
+                        {
+                            requestPath = "/index.html";
+                        }
 
-                        if (!Regex.IsMatch(requestPath, @"\.[a-zA-Z0-9]+$"))
+                        if (!Regex.IsMatch(requestPath, @".[a-zA-Z0-9]+$"))
                         {
                             await API.APIDispatcher.Dispatch(ctx);
                         }
                         else
                         {
-                            if (requestPath == "/")
-                            {
-                                requestPath = "/index.html";
-                            }
+
                             string sanitizedPath = requestPath.TrimStart('/');
                             string fullPath = Path.Combine(MainStructure.conf.docroot, sanitizedPath);
 
