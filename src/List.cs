@@ -1,10 +1,13 @@
 namespace List
 {
-    public class LinkedList {
-        public class ListHead {
+    public class LinkedList
+    {
+        public class ListHead
+        {
             public ListHead? next;
             public ListHead? prev;
-            public ListHead() {
+            public ListHead()
+            {
                 next = this;
                 prev = this;
             }
@@ -16,14 +19,16 @@ namespace List
             list.prev = list;
         }
 
-        private static void _list_add(ref ListHead _new, ref ListHead prev, ref ListHead next) {
-                next.prev = _new;
-                _new.next = next;
-                _new.prev = prev;
-                prev.next = _new;
+        private static void _list_add(ref ListHead _new, ref ListHead prev, ref ListHead next)
+        {
+            next.prev = _new;
+            _new.next = next;
+            _new.prev = prev;
+            prev.next = _new;
         }
 
-        public static void list_add_tail(ref ListHead _new, ref ListHead head) {
+        public static void list_add_tail(ref ListHead _new, ref ListHead head)
+        {
             _list_add(ref _new, ref head.prev, ref head);
         }
     }

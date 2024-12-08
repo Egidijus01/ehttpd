@@ -25,26 +25,32 @@ class Program
         ParseArgs(args);
         if (MainStructure.conf.docroot == null)
         {
-            try {
+            try
+            {
                 MainStructure.conf.docroot = Path.GetFullPath("./www");
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Console.Error.WriteLine($"Error: Unable to determine work dir: {ex.Message}");
                 Environment.Exit(1);
             }
         }
 
-        if (bound == 0) {
+        if (bound == 0)
+        {
             Console.Error.WriteLine("Error: No sockets bound, unable to continue");
             Environment.Exit(1);
         }
 
-        if (!nofork) {
+        if (!nofork)
+        {
             ForkProcess();
         }
         RunServer();
     }
 
-    static void init_defaults_pre() {
+    static void init_defaults_pre()
+    {
         MainStructure.conf.scriptTimeout = 60;
         MainStructure.conf.networkTimeout = 30;
         MainStructure.conf.httpKeepalive = 20;
@@ -55,7 +61,8 @@ class Program
         MainStructure.conf.realm = "Protected Area";
         MainStructure.conf.cgiAlias = new LinkedList.ListHead();
     }
-    static void usage(string name) {
+    static void usage(string name)
+    {
         Console.Write($@"
          _____ _   _ _____ _____ ____  ____  
         | ____| | | |_   _|_   _|  _ \|  _ \ 
@@ -82,7 +89,8 @@ class Program
             switch (optarg)
             {
                 case "-p":
-                    if (i + 1 < args.Length) {
+                    if (i + 1 < args.Length)
+                    {
                         string port = args[++i];
                         bound += AddListenerArg(port);
                     }

@@ -9,7 +9,8 @@ namespace FileHandling
         private LinkedList.ListHead dispatchHandlers;
         private LinkedList.ListHead pendingRequests;
 
-        public FileHandler() {
+        public FileHandler()
+        {
             indexFiles = new LinkedList.ListHead();
             LinkedList.INIT_LIST_HEAD(ref indexFiles);
 
@@ -51,12 +52,13 @@ namespace FileHandling
             LinkedList.list_add_tail(ref d.list, ref dispatchHandlers);
         }
 
-        public void indexAdd(string filename) {
+        public void indexAdd(string filename)
+        {
             indexFile idx = new indexFile
             {
                 name = filename,
                 list = new LinkedList.ListHead()
-            };          
+            };
             LinkedList.INIT_LIST_HEAD(ref idx.list);
             LinkedList.list_add_tail(ref idx.list, ref indexFiles);
         }
