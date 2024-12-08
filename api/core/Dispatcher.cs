@@ -2,10 +2,11 @@ using System;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Router;
 
 namespace API
 {
-    public static class Dispatcher
+    public static class APIDispatcher
     {
         public static async Task SendResponse(HttpListenerResponse response, HttpStatusCode statusCode, string message)
         {
@@ -22,6 +23,13 @@ namespace API
         public static async Task SendErrorResponse(HttpListenerResponse response, HttpStatusCode statusCode, string message)
         {
             await SendResponse(response, statusCode, $"{{\"error\": \"{message}\"}}");
+        }
+
+        public static async Task Dispatch(HttpListenerContext context)
+        {
+            var request = context.Request;
+            var response = context.Response;
+
         }
     }
 }
