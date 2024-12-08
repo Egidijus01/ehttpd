@@ -73,10 +73,12 @@ class Program
         ");
         Console.Write($@"
         Usage: {name} -p [addr:]port -h docroot
-            -f               Do not fork to background
-            -c file          Configuration file, default is '/etc/eserv.conf'
-            -p [addr:]port   Bind to specified address and port, multiple allowed
-            -h directory     Specify the document root, default is '.'               
+            -f                   Do not fork to background
+            -c file              Configuration file, default is '/etc/eserv.conf'
+            -p [addr:]port       Bind to specified address and port, multiple allowed
+            -h directory         Specify the document root, default is '.'  
+            -s certificate file  Path to openssl certificate
+            -k certificate key   Path to openssl certificate's key file           
         ");
     }
 
@@ -120,7 +122,30 @@ class Program
                         Console.WriteLine(decoded);
                     }
                     break;
-
+                case "-s":
+                    if (i + 1 < args.Length)
+                    {
+                        string cert = args[++i];
+                        if (!File.Exists(cert))
+                        {
+                            System.Console.WriteLine("Certificate path " + cert + " doesn't exist");
+                            Environment.Exit(1);
+                        }
+                        MainStructure.conf.key = cert;
+                    }
+                    break;
+                case "-k":
+                    if (i + 1 < args.Length)
+                    {
+                        string key = args[++i];
+                        if (!File.Exists(key))
+                        {
+                            System.Console.WriteLine("Certificate key " + key + " doesn't exist");
+                            Environment.Exit(1);
+                        }
+                        MainStructure.conf.key = key;
+                    }
+                    break;
                 default:
                     usage(args[0]);
                     break;

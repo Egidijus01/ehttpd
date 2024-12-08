@@ -47,6 +47,9 @@ namespace MainStructures
             public int cgiPrefixLen;
             public int eventsRetry;
             public int pageViews;
+            public string certificate;
+            public string key;
+
             public LinkedList.ListHead cgiAlias;
         }
         public enum clientState
