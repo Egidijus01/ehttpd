@@ -19,7 +19,7 @@ namespace Cgi
 			MainStructure.Interpreter? ip = pi.ip;
 			ClearEnv();
 
-			SetEnv("PATH", MainStructure.conf.cgi_path);
+			SetEnv("PATH", MainStructure.conf.cgiPath);
 
 			foreach (MainStructure.envVar ev in GetProcessVars(cl, pi))
 			{
@@ -78,9 +78,9 @@ namespace Cgi
 
 			pi.ip = default(MainStructure.Interpreter);
 
-			if (!string.IsNullOrEmpty(MainStructure.conf.cgi_docroot_path))
+			if (!string.IsNullOrEmpty(MainStructure.conf.cgiDocrootPath))
 			{
-				return PathMatch(MainStructure.conf.cgi_docroot_path, pi.phys);
+				return PathMatch(MainStructure.conf.cgiDocrootPath, pi.phys);
 			}
 
 			return false;

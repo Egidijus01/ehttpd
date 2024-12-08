@@ -45,15 +45,15 @@ class Program
 	}
 
 	static void init_defaults_pre() {
-		MainStructure.conf.script_timeout = 60;
-		MainStructure.conf.network_timeout = 30;
-		MainStructure.conf.http_keepalive = 20;
-		MainStructure.conf.max_script_requests = 3;
-		MainStructure.conf.max_connections = 100;
-		MainStructure.conf.cgi_prefix = "/cgi-bin";
-		MainStructure.conf.cgi_path = "/sbin:/usr/sbin:/bin:/usr/bin";
+		MainStructure.conf.scriptTimeout = 60;
+		MainStructure.conf.networkTimeout = 30;
+		MainStructure.conf.httpKeepalive = 20;
+		MainStructure.conf.maxScriptRequests = 3;
+		MainStructure.conf.maxConnections = 100;
+		MainStructure.conf.cgiPrefix = "/cgi-bin";
+		MainStructure.conf.cgiPath = "/sbin:/usr/sbin:/bin:/usr/bin";
 		MainStructure.conf.realm = "Protected Area";
-		MainStructure.conf.cgi_alias = new LinkedList.ListHead();
+		MainStructure.conf.cgiAlias = new LinkedList.ListHead();
 	}
 	static void usage(string name) {
 		Console.Write($@"
